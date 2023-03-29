@@ -1,10 +1,11 @@
 import sys
+from lista4 import plotseir
 
 
-print("Nazwa wywołanego skryptu to", sys.argv[0])
-if len(sys.argv) > 1:
-    print("Argumenty wywołania:")
-    for arg in sys.argv[1:]:
-        print(arg)
-else:
-    print("Brak argumentów")
+if __name__ == '__main__':
+    if len(sys.argv) < 9:
+        print('Usage: python3 seir_wrapper.py N S0 E0 I0 R0 beta sigma gamma')
+        exit(1)
+    N, S0, E0, I0, R0 = map(int, sys.argv[1:5])
+    beta, sigma, gamma = map(float, sys.argv[6:])
+    plotseir(N, S0, I0, E0, R0, beta, sigma, gamma)

@@ -5,6 +5,7 @@ import zipfile
 from datetime import date
 import PyPDF2
 import os
+import pathlib
 
 
 def zad1(length=8, characters=''):
@@ -52,12 +53,13 @@ def zad3(directories, destination=''):
 
     if destination == '':
         destination = os.getcwd()
-    if type(directories) != tuple and list:
+    if type(directories) != (tuple and list):
         directories = (directories,)
     for directory in directories:
         with zipfile.ZipFile(str(destination) + '/' + str((date.today())) + ' ' + str(directory) + '.zip', 'w')\
                 as zip_file:  # tworzy obiekt zip_file dla każdego podanego katalogu
-            for file in os.scandir(str(directory)):  # iteruje po plikach w danym katalogu
+            path = pathlib.Path(str(directory))
+            for file in path.rglob('*'):
                 zip_file.write(file)
 
 
@@ -76,12 +78,12 @@ def zad4(file_name, number_of_pages):
         if page_count + number_of_pages <= len(reader.pages):
             writer = PyPDF2.PdfWriter()
             writer.append(reader, pages=(page_count, page_count + number_of_pages))
-            writer.write('Duży_pdf ' + str(page_count) + '-' + str(page_count+number_of_pages) + '.pdf')
+            writer.write('Duży_pdf ' + str(page_count+1) + '-' + str(page_count+number_of_pages) + '.pdf')
             writer.close()
         else:
             writer = PyPDF2.PdfWriter()
             writer.append(reader, pages=(page_count, len(reader.pages)))
-            writer.write('Duży_pdf ' + str(page_count) + '-' + str(len(reader.pages)) + '.pdf')
+            writer.write('Duży_pdf ' + str(page_count+1) + '-' + str(len(reader.pages)) + '.pdf')
             writer.close()
         page_count += number_of_pages
 
@@ -141,10 +143,10 @@ def zad6(expression):
 def main():
     # print(zad1(9, characters='ab'))
     # zad2("discs_list_circles.png", (100, 100), 'miniature.jpg')
-    # zad3('abab', destination='/Users/tomasz/PycharmProjects')
+    # zad3(['abab', 'cdcd'], destination='/Users/tomasz/PycharmProjects')
     # zad4('test.pdf', 3)
     # zad5('discs_list_circles.png', 'watermark')
-    # zad6('22*10')
+    zad6('22000000-1')
     pass
 
 

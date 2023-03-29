@@ -18,7 +18,7 @@ def backup(ext, directories):
     :return: None
     """
 
-    if type(directories) != tuple and list:
+    if type(directories) != (tuple and list):
         directories = (directories,)
     name = '/Users/tomasz/PycharmProjects/programowanie/Backup/copy-'+str(date.today())
     os.makedirs(name, exist_ok=True)
@@ -39,7 +39,7 @@ def endline_swapper(txtfiles):
     :return: None
     """
 
-    if type(txtfiles) != tuple and list:
+    if type(txtfiles) != (tuple and list):
         txtfiles = (txtfiles,)
     for file in txtfiles:
         with open(file, 'rb') as f:
@@ -66,7 +66,7 @@ def pdf_merg(files):
     """
 
     writer = PyPDF2.PdfWriter()
-    if type(files) != tuple and list:
+    if type(files) != (tuple and list):
         files = (files,)
     for file in files:
         writer.append(PyPDF2.PdfReader(file))
