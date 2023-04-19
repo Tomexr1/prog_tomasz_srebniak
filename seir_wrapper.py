@@ -1,3 +1,7 @@
+"""
+    Wrapper dla funkcji plotseir z modułu lista4.
+"""
+
 import argparse
 from lista4 import plotseir
 
@@ -13,7 +17,8 @@ if __name__ == '__main__':
     parser.add_argument('-sigma', type=float, help='Wskaźnik inkubacji', default=0.19)
     parser.add_argument('-gamma', type=float, help='Wskaźnik wyzdrowień', default=0.34)
     args = parser.parse_args()
-    # handling not given arguments
+
+    # radzenie sobie z niepodanymi argumentami
     if args.N is None:
         if args.S0 is None:  # N i S0 nie są podane
             sum_of_gotten_values = sum(arg for arg in (args.E0, args.I0, args.R0) if arg is not None)
@@ -52,6 +57,6 @@ if __name__ == '__main__':
                     args.R0 = 0 if args.R0 is None else args.R0
                 elif sum_of_gotten_values + args.S0 != args.N:  # nadal nie sumują się do N - wpisana do R0
                     args.R0 = difference
+
     #  rysowanie wykresu
-    # print(args)
     plotseir(args.N, args.S0, args.E0, args.I0, args.R0, args.beta, args.sigma, args.gamma)

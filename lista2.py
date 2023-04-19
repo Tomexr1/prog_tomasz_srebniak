@@ -144,9 +144,9 @@ def main():
     # print(zad1(9, characters='ab'))
     # zad2("discs_list_circles.png", (100, 100), 'miniature.jpg')
     # zad3(['abab', 'cdcd'], destination='/Users/tomasz/PycharmProjects')
-    # zad4('test.pdf', 3)
+    zad4('test.pdf', 3)
     # zad5('discs_list_circles.png', 'watermark')
-    zad6('22000000-1')
+    # zad6('22000000-1')
     pass
 
 

@@ -7,27 +7,32 @@ import cv2
 import requests
 from bs4 import BeautifulSoup
 import webbrowser
+import pathlib
 
 
-def backup(ext, directories):
+def backup(ext, directories, days=3, dst='/Users/tomasz/PycharmProjects/programowanie/'):
     """
-    Tworzy kopię zapasową podanych katalogów.
+    Tworzy kopię zapasową podanych plików o podanym rozszerzeniu, zapisuje w podanym katalogu.
 
     :param ext: (str) - rozszerzenie
     :param directories: (tuple or float or string) - katalogi do spakowania
+    :param days: (float) - ile dni upłynęlo od ostatniej modyfikacji
+    :param dst: (str) - katalog docelowy
     :return: None
     """
 
-    if type(directories) != (tuple and list):
+    if type(directories) != tuple and type(directories) != list:
         directories = (directories,)
-    name = '/Users/tomasz/PycharmProjects/programowanie/Backup/copy-'+str(date.today())
+    name = str(dst)+'Backup/copy-'+str(date.today())
     os.makedirs(name, exist_ok=True)
     for directory in directories:
-        for file in os.listdir(str(directory)):
+        path = pathlib.Path(str(directory))
+        for file in path.rglob('*'):
+            # print(file)
             ts = os.path.getmtime(file)  # timestamp
             duration = datetime.now() - datetime.fromtimestamp(ts)  # timedelta
             duration_in_days = duration.total_seconds()/259200  # timedelta w dniach
-            if duration_in_days < 3 and str(file).endswith(str(ext)):
+            if duration_in_days < days and str(file).endswith(str(ext)):
                 shutil.copy(file, name)
 
 
@@ -39,12 +44,11 @@ def endline_swapper(txtfiles):
     :return: None
     """
 
-    if type(txtfiles) != (tuple and list):
+    if type(txtfiles) != tuple and type(txtfiles) != list:
         txtfiles = (txtfiles,)
     for file in txtfiles:
         with open(file, 'rb') as f:
             text = f.read()
-            print(text)
             if b'\r\n' in text:  # Windows
                 rplc = (b'\r\n', b'\n')
             elif b'\n' in text:  # Unix
@@ -55,6 +59,7 @@ def endline_swapper(txtfiles):
             text = text.replace(rplc[0], rplc[1])
         with open(file, 'wb') as f:
             f.write(text)
+            print(text)
 
 
 def pdf_merg(files):
@@ -66,8 +71,9 @@ def pdf_merg(files):
     """
 
     writer = PyPDF2.PdfWriter()
-    if type(files) != (tuple and list):
+    if type(files) != tuple and type(files) != list:
         files = (files,)
+    print(files)
     for file in files:
         writer.append(PyPDF2.PdfReader(file))
     writer.write('merged.pdf')
@@ -100,7 +106,7 @@ def qrcode_reader(img):
     return value
 
 
-def brackets_matcher(expression):
+def brackets_matching(expression):
     """
     Sprawdza czy nawiasy w podanym wyrażeniu są poprawnie sparowane.
 
@@ -110,7 +116,9 @@ def brackets_matcher(expression):
 
     stack = []
     for char in expression:
-        if char == '(' or char == '[' or char == '{':
+        if char == '(' or char == '[' or char == '{' or char == '<':
+            if stack and char == stack[-1]:  # dwa nawiasy nie mogą być koło siebie!!
+                return False
             stack.append(char)
         elif char == ')':
             if not stack or stack[-1] != '(':
@@ -127,6 +135,11 @@ def brackets_matcher(expression):
                 return False
             else:  # stack[-1] == '{':
                 stack.pop()
+        elif char == '>':
+            if not stack or stack[-1] != '<':
+                return False
+            else:  # stack[-1] == '<':
+                stack.pop()
         else:
             continue
     return not stack
@@ -139,21 +152,28 @@ def wiki_article():
     :return: None
     """
 
-    res = requests.get('https://en.wikipedia.org/wiki/Special:Random')
-    bs4_object = BeautifulSoup(res.text, 'html.parser')
-    url = bs4_object.select('link[rel="canonical"]')[0].get('href')
-    title = bs4_object.select('h1')[0].getText()
-    print('Czy chcesz przeczytać artykuł o ' + title + '?')
-    if input('T/N: ').lower() == 't':
-        webbrowser.open(url)
+    counter = 0
+    while counter < 5:
+        res = requests.get('https://en.wikipedia.org/wiki/Special:Random')
+        bs4_object = BeautifulSoup(res.text, 'html.parser')
+        url = bs4_object.select('link[rel="canonical"]')[0].get('href')
+        title = bs4_object.select('h1')[0].getText()
+        print('Czy chcesz przeczytać artykuł o ' + title + '?')
+        if input('T/N: ').lower() == 't':
+            webbrowser.open(url)
+            break
+        else: counter += 1
+    return
 
 
 if __name__ == "__main__":
-    # backup('.py', '/Users/tomasz/PycharmProjects/programowanie')
+    # backup('.txt', '/Users/tomasz/PycharmProjects/wstep_do_programowania')
     # pdf_merg(('test.pdf', 'test copy.pdf'))
-    # endline_swapper('textfile.txt')
+    # endline_swapper('tekst.txt')
     # qrcode_generator('https://www.google.com')
     # print(qrcode_reader('qrcode.png'))
-    # print(brackets_matcher('2+2*(3+4)[]{[{()gr}]seawf}'))
+    # print(brackets_matching('()2+2*(3+4)[]{[{()gr}]seawf}'))
+    # print(brackets_matching('()(())'))
     # wiki_article()
+    # pdf_merg(("Duży_pdf 1-3.pdf", "Duży_pdf 4-6.pdf", "Duży_pdf 7-9.pdf", "Duży_pdf 10-12.pdf", "Duży_pdf 13-14.pdf"))
     pass
