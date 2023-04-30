@@ -8,6 +8,7 @@ from tkcalendar import DateEntry
 def get_data():
     """
     Funkcja pobierająca kursy walut z NBP API lub wczytująca z pliku kursy z ostatniego pobrania.
+
     :return: rates - lista słowników currency, code, mid
     """
 
@@ -29,25 +30,54 @@ def get_data():
     return rates, connection, date
 
 
-def get_selected_date():
+def get_selected_data(*args):
     """
-    Funkcja pobierająca datę z kalendarza.
-    :return: date - wybrana data
+    Funkcja pobierająca kursy walut z NBP API na podsawie wybranej daty i aktualizująca listy walut, kodów i kursów.
+
+    :param args:
+    :return: None
     """
-    pass
-    # date = selected_date.get()
-    # print(date)
+
+    if len(selected_date.get()) > 4:
+        new_date = selected_date.get()
+        url = f"http://api.nbp.pl/api/exchangerates/tables/A/{new_date}/?format=json"
+        try:
+            r = requests.get(url)
+            r = r.json()
+            n_currencies = [rate["currency"] for rate in r[0]["rates"]]
+            n_currencies.insert(0, "polski złoty")
+            n_codes = [rate["code"] for rate in r[0]["rates"]]
+            n_codes.insert(0, "PLN")
+            n_mids = [rate["mid"] for rate in r[0]["rates"]]
+            n_mids.insert(0, 1)
+            global currencies, codes, mids
+            currencies = n_currencies
+            codes = n_codes
+            mids = n_mids
+            input_currency_list.config(values=codes)
+            output_currency_list.config(values=codes)
+            online_label.config(text="Online", fg="green")
+            msg.config(text="Załadowano nowe kursy")
+            conversion()
+        except requests.exceptions.ConnectionError:
+            online_label.config(text="Offline", fg="red")
+            msg.config(text="Brak internetu")
+        except json.decoder.JSONDecodeError:
+            msg.config(text="Brak danych")
+            online_label.config(text="Online", fg="green")
 
 
-def przewalutowanie():
+def conversion(*args):
     """
-    Funkcja przeliczająca waluty.
+    Funkcja przeliczająca waluty i aktualizująca etykiety z wynikami.
 
-    :return: output_value - przeliczona wartość
+    :param args:
+    :return: None
     """
-    input_currency = input_currency_list.get()
-    output_currency = output_currency_list.get()
-    input_amount = original_value_entry.get()
+
+    input_currency = var1.get()
+    output_currency = var2.get()
+    input_amount = var3.get()
     input_currency_str = input_currency
     output_currency_str = output_currency
     output = ("", "")
@@ -69,29 +99,33 @@ def przewalutowanie():
 
     lbl4.config(text=output[0])
     output_value_entry.config(text=output[1])
-    root.after(1000, przewalutowanie)
 
 
-def refresh():
-    pass
-    # rates = get_data()[0]
-    # currencies = [rate["currency"] for rate in rates]
-    # currencies.insert(0, "polski złoty")
-    # codes = [rate["code"] for rate in rates]
-    # codes.insert(0, "PLN")
-    # mids = [rate["mid"] for rate in rates]
-    # mids.insert(0, 1)
-    # online = "Online" if get_data()[1] else "Offline"
-    # # Label z informacją o stanie połączenia
-    # online_label = Label(root, text=online, fg="green" if get_data()[1] else "red")
-    # online_label.configure(font="underline")
-    # online_label.grid(row=0, column=0, sticky=NW)
-    # date_label = Label(root, text=f"Dane z dnia: {get_data()[2]}")
-    # # date_label.pack(side=LEFT, anchor=NW)
-    # date_label.grid(row=0, column=0, sticky=NE)
+def refresh(*args):
+    """
+    Funkcja odświeżająca aplikację.
+
+    :param args:
+    :return: None
+    """
+
+    rates, is_online = get_data()[0], get_data()[1]
+    n_currencies = [rate["currency"] for rate in rates]
+    n_currencies.insert(0, "polski złoty")
+    n_codes = [rate["code"] for rate in rates]
+    n_codes.insert(0, "PLN")
+    n_mids = [rate["mid"] for rate in rates]
+    n_mids.insert(0, 1)
+    global currencies, codes, mids
+    currencies = n_currencies
+    codes = n_codes
+    mids = n_mids
+    if is_online:
+        online_label.config(text="Online", fg="green")
+    else:
+        online_label.config(text="Offline", fg="red")
 
 
-# application calculating currency exchange based on NBP API
 if __name__ == "__main__":
     root = Tk()
     root.geometry('450x300+400+400')
@@ -104,6 +138,8 @@ if __name__ == "__main__":
     root.rowconfigure(3, weight=2)
     root.rowconfigure(4, weight=3)
     root.rowconfigure(5, weight=1)
+    style = ttk.Style(root)
+    style.theme_use('clam')
 
     # ładowanie danych
     rates, is_online, date = get_data()
@@ -115,12 +151,12 @@ if __name__ == "__main__":
     mids.insert(0, 1)
     online = "Online" if is_online else "Offline"
 
-
     # Menu bar
     menubar = Menu(root)
     filemenu = Menu(menubar, tearoff=0)
     filemenu.add_command(label="Refresh", command=refresh, accelerator="CMD+R")
     menubar.add_cascade(label="File", menu=filemenu)
+    root.bind('<Command-r>', refresh)
     root.config(menu=menubar)
 
     # Label z informacją o stanie połączenia
@@ -128,37 +164,45 @@ if __name__ == "__main__":
     online_label.grid(row=0, column=0, sticky=NW)
 
     # Kalendarz
-    # selected_date = StringVar()
-    # cal = DateEntry(root, selectmode='day',date_pattern='yyyy-mm-dd',
-    #                 year=int(date[:4]), month=int(date[5:7]), day=int(date[8:]), textvariable=selected_date)
-    # cal.grid(row=0, column=0, sticky=NE)
-    # selected_date.trace("w", get_selected_date)
-
-    date_label = Label(root, text=f"Dane z dnia: {get_data()[2]}")
-    date_label.grid(row=0, column=0, sticky=NE, columnspan=2)
+    lbl0 = Label(root, text="Dane z dnia: ")
+    lbl0.configure(font=13)
+    lbl0.grid(row=0, column=0, sticky=N)
+    selected_date = StringVar()
+    cal = DateEntry(root, selectmode='day',date_pattern='yyyy-mm-dd', year=int(date[:4]),
+                    month=int(date[5:7]), day=int(date[8:]), textvariable=selected_date, locale='pl_PL')
+    cal.grid(row=0, column=0, columnspan=2, sticky=N, pady=1)
+    selected_date.trace("w", get_selected_data)
+    msg = Message(root, text="", font=("Arial", 12), width=200)
+    msg.grid(row=0, column=1, columnspan=2, sticky=NE, padx=2, pady=2)
 
     # Combobox z walutą początkową
+    var1 = StringVar()
     lbl1 = Label(root, text="Waluta początkowa")
     lbl1.configure(font=13)
     lbl1.grid(row=1, column=0, sticky=W, padx=20)
-    input_currency_list = ttk.Combobox(root, values=codes)
+    input_currency_list = ttk.Combobox(root, values=codes, textvariable=var1)
     input_currency_list.set("-")
     input_currency_list.grid(row=1, column=1)
+    var1.trace("w", conversion)
 
     # Combobox z walutą końcową
+    var2 = StringVar()
     lbl2 = Label(root, text="Waluta końcowa")
     lbl2.configure(font=13)
     lbl2.grid(row=2, column=0, sticky=W, padx=20)
-    output_currency_list = ttk.Combobox(root, values=codes)
+    output_currency_list = ttk.Combobox(root, values=codes, textvariable=var2)
     output_currency_list.set("-")
     output_currency_list.grid(row=2, column=1)
+    var2.trace("w", conversion)
 
     # Entry z kwotą początkową
+    var3 = StringVar()
     lbl3 = Label(root, text="Kwota początkowa")
     lbl3.configure(font=13)
     lbl3.grid(row=3, column=0, sticky=W, padx=20)
-    original_value_entry = Entry(root)
+    original_value_entry = Entry(root, textvariable=var3)
     original_value_entry.grid(row=3, column=1)
+    var3.trace("w", conversion)
 
     # Label z kwotą końcową
     lbl4 = Label(root)
@@ -167,12 +211,9 @@ if __name__ == "__main__":
     output_value_entry = Label(root)
     output_value_entry.config(font=("Courier", 16, "bold"))
     output_value_entry.grid(row=4, column=1, sticky=W)
-    # changed=0
 
     # Przycisk do wyjścia
     btn = Button(root, text="Wyjście", command=quit)
     btn.grid(row=5, column=0, columnspan=2)
-
-    przewalutowanie()
 
     root.mainloop()
