@@ -42,7 +42,6 @@ for i in range(50):
     # aktualizacja aktualnego wierzchołka
     current_node = neighbour
 
-# create gif with with 2 frame per second speed
 
 with imageio.get_writer('RandomWalk.gif', mode='I', duration=1) as writer:  # duration=1 - zmienai klatkę co sekundę
     for filename in frames:
