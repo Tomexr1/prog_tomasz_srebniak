@@ -50,20 +50,27 @@ def get_selected_data(*args):
             n_codes.insert(0, "PLN")
             n_mids = [rate["mid"] for rate in r[0]["rates"]]
             n_mids.insert(0, 1)
-            global currencies, codes, mids
+            n_date = r[0]["effectiveDate"]
+            global currencies, codes, mids, date
             currencies = n_currencies
             codes = n_codes
             mids = n_mids
+            date = n_date
             input_currency_list.config(values=codes)
             output_currency_list.config(values=codes)
             online_label.config(text="Online", fg="green")
             msg.config(text="Załadowano nowe kursy")
+            msg.after(3000, lambda: msg.config(text=""))
             conversion()
         except requests.exceptions.ConnectionError:
             online_label.config(text="Offline", fg="red")
+            cal.set_date(date)
             msg.config(text="Brak internetu")
+            msg.after(3000, lambda: msg.config(text=""))
         except json.decoder.JSONDecodeError:
+            cal.set_date(date)
             msg.config(text="Brak danych")
+            msg.after(3000, lambda: msg.config(text=""))
             online_label.config(text="Online", fg="green")
 
 
@@ -101,7 +108,7 @@ def conversion(*args):
     output_value_entry.config(text=output[1])
 
 
-def refresh(*args):
+def reload(*args):
     """
     Funkcja odświeżająca aplikację.
 
@@ -109,21 +116,28 @@ def refresh(*args):
     :return: None
     """
 
-    rates, is_online = get_data()[0], get_data()[1]
+    rates, is_online, n_date = get_data()
     n_currencies = [rate["currency"] for rate in rates]
     n_currencies.insert(0, "polski złoty")
     n_codes = [rate["code"] for rate in rates]
     n_codes.insert(0, "PLN")
     n_mids = [rate["mid"] for rate in rates]
     n_mids.insert(0, 1)
-    global currencies, codes, mids
+    global currencies, codes, mids, date
     currencies = n_currencies
     codes = n_codes
     mids = n_mids
+    date = n_date
+    cal.set_date(date)
     if is_online:
         online_label.config(text="Online", fg="green")
+        msg.config(text="Załadowano nowe kursy")
+        msg.after(3000, lambda: msg.config(text=""))
     else:
         online_label.config(text="Offline", fg="red")
+        msg.config(text="Brak internetu")
+        msg.after(3000, lambda: msg.config(text=""))
+    conversion()
 
 
 if __name__ == "__main__":
@@ -154,9 +168,9 @@ if __name__ == "__main__":
     # Menu bar
     menubar = Menu(root)
     filemenu = Menu(menubar, tearoff=0)
-    filemenu.add_command(label="Refresh", command=refresh, accelerator="CMD+R")
+    filemenu.add_command(label="Reload", command=reload, accelerator="CMD+R")
     menubar.add_cascade(label="File", menu=filemenu)
-    root.bind('<Command-r>', refresh)
+    root.bind('<Command-r>', reload)
     root.config(menu=menubar)
 
     # Label z informacją o stanie połączenia
@@ -168,7 +182,7 @@ if __name__ == "__main__":
     lbl0.configure(font=13)
     lbl0.grid(row=0, column=0, sticky=N)
     selected_date = StringVar()
-    cal = DateEntry(root, selectmode='day',date_pattern='yyyy-mm-dd', year=int(date[:4]),
+    cal = DateEntry(root, selectmode='day', date_pattern='yyyy-mm-dd', year=int(date[:4]),
                     month=int(date[5:7]), day=int(date[8:]), textvariable=selected_date, locale='pl_PL')
     cal.grid(row=0, column=0, columnspan=2, sticky=N, pady=1)
     selected_date.trace("w", get_selected_data)
