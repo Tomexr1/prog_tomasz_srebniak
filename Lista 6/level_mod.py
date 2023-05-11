@@ -1,4 +1,5 @@
-import pygame, constants, utils, mob_mod, player_mod, menu
+import pygame, constants, utils, mob_mod, player_mod, menu, summary
+from sys import exit
 
 
 class Level:
@@ -45,13 +46,14 @@ class Level:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
+                    exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_p:
                         pause = False
                     if event.key == pygame.K_ESCAPE:
                         self.running = False
                         pause = False
-                        self.kill_all_sprites()
+                        mob_mod.bullets_group.empty()
 
             pygame.display.update()
             self.clock.tick(15)
@@ -59,6 +61,7 @@ class Level:
     def draw(self):
         self.all_sprites.draw(self.screen)
         self.mob_draw()
+        self.draw_hud()
 
     def add_mob(self, spawn_time=100):
         now = pygame.time.get_ticks()
@@ -85,7 +88,8 @@ class Level:
     def hits(self):
         mob_hits = pygame.sprite.groupcollide(self.mobs, self.bullets, True, True)
         for hit in mob_hits:
-            pass
+            summary.kills += 1
+            pass  # dźwięk i animacja wybuchu
 
     def lives_update(self):
         bullet_hits = pygame.sprite.spritecollide(self.player, self.mob_bullets, True)
@@ -113,10 +117,12 @@ class Level:
         menu.won()
         Level.running = False
 
-    def kill_all_sprites(self):
-        self.all_sprites.empty()
-        self.mobs.empty()
-        self.bullets.empty()
-        self.mob_bullets.empty()
-        mob_mod.bullets_group.empty()
-        self.player.bullets.empty()
+    def draw_hud(self):
+        utils.draw_text(self.screen, str(summary.kills), 50, constants.WIDTH/2 + 10, 10,
+                        constants.SCORE_RED)
+        utils.draw_text(self.screen, 'Czas: ' + str(round(summary.time / 1000)) + 's', 20, 730, 10, constants.SCORE_RED)
+        utils.draw_text(self.screen, 'ŻYCIA: ', 30, 80, 10, constants.SCORE_RED)
+        heart_img = pygame.image.load("heart.png").convert_alpha()
+        heart_img = pygame.transform.scale(heart_img, (30, 30))
+        for i in range(self.player_lives):
+            self.screen.blit(heart_img, (140 + i * 40, 10))

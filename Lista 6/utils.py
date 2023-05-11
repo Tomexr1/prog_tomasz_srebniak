@@ -2,9 +2,9 @@ import pygame, constants
 import json
 
 
-def draw_text(surf, text, size, x, y):
+def draw_text(surf, text, size, x, y, color=constants.WHITE):
     font = pygame.font.Font(pygame.font.match_font('arial'), size)
-    text_surface = font.render(text, True, constants.WHITE)
+    text_surface = font.render(text, True, color)
     text_rect = text_surface.get_rect()
     text_rect.midtop = (x,y)
     surf.blit(text_surface,text_rect)
