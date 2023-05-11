@@ -1,4 +1,4 @@
-import pygame, constants, text, mob_mod, player_mod, menu
+import pygame, constants, utils, mob_mod, player_mod, menu
 
 
 class Level:
@@ -37,9 +37,9 @@ class Level:
 
     def paused(self):
         print("paused")
-        text.draw_text(self.screen, "Zatrzymano", 30, 400, 120)
-        text.draw_text(self.screen, "Naciśnij [p] aby wznowić", 18, 400, 250)
-        text.draw_text(self.screen, "Naciśnij [ESC] aby wyjść z gry", 18, 400, 300)
+        utils.draw_text(self.screen, "Zatrzymano", 30, 400, 120)
+        utils.draw_text(self.screen, "Naciśnij [p] aby wznowić", 18, 400, 250)
+        utils.draw_text(self.screen, "Naciśnij [ESC] aby wyjść z gry", 18, 400, 300)
         pause = True
         while pause:
             for event in pygame.event.get():

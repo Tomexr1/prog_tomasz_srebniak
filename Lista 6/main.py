@@ -1,4 +1,4 @@
-import pygame, constants, menu, player_mod, level_mod
+import pygame, constants, menu, player_mod, level_mod, utils
 from sys import exit
 
 pygame.init()
@@ -9,7 +9,6 @@ pygame.display.set_caption("Lista 6")
 if __name__ == "__main__":
     try:
         while True:
-            print("Start gry")
             menu.start_menu()
 
             clock = pygame.time.Clock()
@@ -19,11 +18,20 @@ if __name__ == "__main__":
             level = level_mod.Level(player, screen, clock)
             level.running = True
 
+            # kontrola muzyki
+            if utils.get_music_settings()[0] == "on":
+                if not pygame.mixer.music.get_busy():
+                    # pygame.mixer.music.load("")
+                    # pygame.mixer.music.play(-1)
+                    pass
+            print("Start gry")
+
             while level.running:
                 clock.tick(constants.FPS)
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         level.running = False
+                        raise menu.MenuQuit
 
                 level.update()
 
@@ -44,6 +52,7 @@ if __name__ == "__main__":
                 pygame.display.flip()
             del level
     except menu.MenuQuit: pass
+
     print("Koniec gry")
     pygame.mixer.quit()
     pygame.quit()
