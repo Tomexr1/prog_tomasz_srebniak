@@ -1,4 +1,4 @@
-import pygame, constants, utils, mob_mod, player_mod, menu, summary
+import pygame, constants, utils, mob_mod, player_mod, menu, stats
 from sys import exit
 
 
@@ -21,6 +21,7 @@ class Level:
         self.scrolling = True
         self.mob_time = pygame.time.get_ticks()
         self.player_lives = 3
+        self.paused_timer = 0
 
     def update(self):
         self.bullets.add(self.player.bullets)
@@ -38,6 +39,7 @@ class Level:
 
     def paused(self):
         print("paused")
+        paused_time = pygame.time.get_ticks()
         utils.draw_text(self.screen, "Zatrzymano", 30, 400, 120)
         utils.draw_text(self.screen, "Naciśnij [p] aby wznowić", 18, 400, 250)
         utils.draw_text(self.screen, "Naciśnij [ESC] aby wyjść z gry", 18, 400, 300)
@@ -49,6 +51,7 @@ class Level:
                     exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_p:
+                        self.paused_timer += pygame.time.get_ticks() - paused_time
                         pause = False
                     if event.key == pygame.K_ESCAPE:
                         self.running = False
@@ -63,32 +66,58 @@ class Level:
         self.mob_draw()
         self.draw_hud()
 
-    def add_mob(self, spawn_time=100):
+    def add_mob1(self, spawn_rate=100):
         now = pygame.time.get_ticks()
-        if now - self.mob_time > spawn_time:
-            mob = mob_mod.Mob(constants.WIDTH/2 + 10, 100, constants.WIDTH/2, 100)
-            mob2 = mob_mod.Mob(constants.WIDTH / 4, 100, constants.WIDTH / 2, 100)
-            mob3 = mob_mod.Mob(constants.WIDTH / 4 * 3, 100, constants.WIDTH / 2, 100)
-            mob4 = mob_mod.Mob(constants.WIDTH / 3 * 2, 100, constants.WIDTH / 2, 100)
-            self.all_sprites.add(mob2)
-            self.mobs.add(mob2)
-            self.all_sprites.add(mob3)
-            self.mobs.add(mob3)
-            self.all_sprites.add(mob4)
-            self.mobs.add(mob4)
-
+        if now - self.mob_time > spawn_rate:
+            mob = mob_mod.Mob(400, 0, 0, 3)
             self.all_sprites.add(mob)
             self.mobs.add(mob)
             self.mob_time = now
 
+    def add_mob2(self, spawn_rate=100):
+        now = pygame.time.get_ticks()
+        if now - self.mob_time > spawn_rate:
+            mob = mob_mod.Mob(constants.WIDTH, 400, -2, 4, 1)
+            self.all_sprites.add(mob)
+            self.mobs.add(mob)
+            self.mob_time = now
+
+    def add_mob3(self, spawn_rate=100):
+        now = pygame.time.get_ticks()
+        if now - self.mob_time > spawn_rate:
+            mob = mob_mod.Mob(0, 100, 4, 4, 1, 10**3)
+            self.all_sprites.add(mob)
+            self.mobs.add(mob)
+            self.mob_time = now
+
+    def add_mob4(self, spawn_rate=100):
+        now = pygame.time.get_ticks()
+        if now - self.mob_time > spawn_rate:
+            mob1 = mob_mod.Mob(200, -20, 0, 1, 0)
+            mob2 = mob_mod.Mob(400, -20, 0, 1, 0, 500)
+            mob3 = mob_mod.Mob(600, -20, 0, 1, 0)
+            self.all_sprites.add(mob1)
+            self.mobs.add(mob1)
+            self.all_sprites.add(mob2)
+            self.mobs.add(mob2)
+            self.all_sprites.add(mob3)
+            self.mobs.add(mob3)
+            self.mob_time = now
+
     def mob_draw(self):
-        if -5800 < self.starting_position < -5791:
-            self.add_mob()
+        if -5800 < self.starting_position < -5750:
+            self.add_mob1(700)
+        if -5000 < self.starting_position < -4600:
+            self.add_mob2(700)
+        if -3800 < self.starting_position < -3400:
+            self.add_mob3(1400)
+        if -3000 < self.starting_position < -2900:
+            self.add_mob4(1400)
 
     def hits(self):
         mob_hits = pygame.sprite.groupcollide(self.mobs, self.bullets, True, True)
         for hit in mob_hits:
-            summary.kills += 1
+            stats.kills += 1
             pass  # dźwięk i animacja wybuchu
 
     def lives_update(self):
@@ -112,15 +141,16 @@ class Level:
 
         if self.player_lives == 0:
             self.running = False
+            mob_mod.bullets_group.empty()
 
     def end_of_game(self):
         menu.won()
         Level.running = False
 
     def draw_hud(self):
-        utils.draw_text(self.screen, str(summary.kills), 50, constants.WIDTH/2 + 10, 10,
+        utils.draw_text(self.screen, str(stats.kills), 50, constants.WIDTH/2 + 10, 10,
                         constants.SCORE_RED)
-        utils.draw_text(self.screen, 'Czas: ' + str(round(summary.time / 1000)) + 's', 20, 730, 10, constants.SCORE_RED)
+        utils.draw_text(self.screen, 'Czas: ' + str(round(stats.time / 1000)) + 's', 20, 730, 10, constants.SCORE_RED)
         utils.draw_text(self.screen, 'ŻYCIA: ', 30, 80, 10, constants.SCORE_RED)
         heart_img = pygame.image.load("heart.png").convert_alpha()
         heart_img = pygame.transform.scale(heart_img, (30, 30))

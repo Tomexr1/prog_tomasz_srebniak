@@ -150,8 +150,9 @@ if __name__ == "__main__":
     root.rowconfigure(1, weight=2)
     root.rowconfigure(2, weight=2)
     root.rowconfigure(3, weight=2)
-    root.rowconfigure(4, weight=3)
-    root.rowconfigure(5, weight=1)
+    root.rowconfigure(4, weight=1)
+    root.rowconfigure(5, weight=2)
+    root.rowconfigure(6, weight=1)
     style = ttk.Style(root)
     style.theme_use('clam')
 
@@ -221,13 +222,14 @@ if __name__ == "__main__":
     # Label z kwotą końcową
     lbl4 = Label(root)
     lbl4.configure(font=13)
-    lbl4.grid(row=4, column=0, sticky=W, padx=10)
+    lbl4.grid(row=4, column=0, sticky=W, padx=10, columnspan=2)
+
     output_value_entry = Label(root)
     output_value_entry.config(font=("Courier", 16, "bold"))
-    output_value_entry.grid(row=4, column=1, sticky=W)
+    output_value_entry.grid(row=5, column=0, sticky=W, padx=10, columnspan=2)
 
     # Przycisk do wyjścia
     btn = Button(root, text="Wyjście", command=quit)
-    btn.grid(row=5, column=0, columnspan=2)
+    btn.grid(row=6, column=0, columnspan=2)
 
     root.mainloop()

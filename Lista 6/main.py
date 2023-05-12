@@ -1,4 +1,4 @@
-import pygame, constants, menu, player_mod, level_mod, utils, summary
+import pygame, constants, menu, player_mod, level_mod, utils, stats
 from sys import exit
 
 pygame.init()
@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
             while level.running:
                 clock.tick(constants.FPS)
-                summary.time = pygame.time.get_ticks() - menu_timer
+                stats.time = pygame.time.get_ticks() - menu_timer - level.paused_timer
 
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:

@@ -5,8 +5,7 @@ from pygame.locals import *
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super(Player, self).__init__()
-        self.image = pygame.image.load("jet.png").convert()
-        self.image.set_colorkey(constants.WHITE, RLEACCEL)
+        self.image = pygame.image.load("graphics/plane1.png").convert_alpha()
         self.rect = self.image.get_rect()
         self.rect.centerx = constants.WIDTH / 2 + 7
         self.rect.bottom = constants.HEIGHT - 60
