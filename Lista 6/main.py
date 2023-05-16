@@ -23,7 +23,7 @@ if __name__ == "__main__":
                 pygame.mixer.music.load("ingame_music.mp3")  # po minucie zaczyna się perkusja
                 pygame.mixer.music.set_volume(0.2)
                 pygame.mixer.music.play(-1)
-            print("Start gry")
+            print("Start g ry")
 
             while level.running:
                 clock.tick(constants.FPS)
