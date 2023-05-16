@@ -26,9 +26,10 @@ def start_menu():
         # kontrola muzyki
         if utils.get_music_settings()[1] == "on":
             if not pygame.mixer.music.get_busy():
-                pygame.mixer.music.load("ingamemusic.mp3")
+                pygame.mixer.music.load("menu_music.mp3")
                 pygame.mixer.music.play(-1)
-                pass
+        else:
+            pygame.mixer.music.stop()
         if menu_state == "main_menu":
             command = utils.draw_main_menu_buttons(screen)
             if command == 0:  # start
