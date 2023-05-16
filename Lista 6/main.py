@@ -21,8 +21,8 @@ if __name__ == "__main__":
             # kontrola muzyki
             if utils.get_music_settings()[0] == "on":
                 if not pygame.mixer.music.get_busy():
-                    # pygame.mixer.music.load("")
-                    # pygame.mixer.music.play(-1)
+                    pygame.mixer.music.load("ingamemusic.mp3")
+                    pygame.mixer.music.play(-1)
                     pass
             print("Start gry")
 

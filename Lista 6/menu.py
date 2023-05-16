@@ -5,6 +5,8 @@ background = pygame.image.load("space.png").convert_alpha()
 background = pygame.transform.scale(background, (constants.WIDTH, constants.HEIGHT))
 
 clock = pygame.time.Clock()
+# pygame.mixer.music.load("ingamemusic.mp3")
+# pygame.mixer.music.play(-1)
 
 
 class MenuQuit(Exception): pass
@@ -24,8 +26,8 @@ def start_menu():
         # kontrola muzyki
         if utils.get_music_settings()[1] == "on":
             if not pygame.mixer.music.get_busy():
-                # pygame.mixer.music.load("")
-                # pygame.mixer.music.play(-1)
+                pygame.mixer.music.load("ingamemusic.mp3")
+                pygame.mixer.music.play(-1)
                 pass
         if menu_state == "main_menu":
             command = utils.draw_main_menu_buttons(screen)
