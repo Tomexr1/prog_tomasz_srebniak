@@ -20,10 +20,9 @@ if __name__ == "__main__":
 
             # kontrola muzyki
             if utils.get_music_settings()[0] == "on":
-                pygame.mixer.music.load("ingame_music.mp3")  # po minucie zaczyna się perkusja
+                pygame.mixer.music.load("music/ingame_music.mp3")  # po minucie zaczyna się perkusja
                 pygame.mixer.music.set_volume(0.2)
                 pygame.mixer.music.play(-1)
-            print("Start g ry")
 
             while level.running:
                 clock.tick(constants.FPS)
@@ -55,7 +54,6 @@ if __name__ == "__main__":
             del level
     except menu.MenuQuit: pass
 
-    print("Koniec gry")
     pygame.mixer.quit()
     pygame.quit()
     exit()

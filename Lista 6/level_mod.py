@@ -1,4 +1,4 @@
-import pygame, constants, utils, mob_mod, player_mod, menu, stats
+import pygame, constants, utils, mob_mod, player_mod, menu, stats, explosion
 from sys import exit
 
 
@@ -38,7 +38,7 @@ class Level:
             self.paused()
 
     def paused(self):
-        print("paused")
+        pygame.mixer.music.pause()
         paused_time = pygame.time.get_ticks()
         utils.draw_text(self.screen, "Zatrzymano", 30, 400, 120)
         utils.draw_text(self.screen, "Naciśnij [p] aby wznowić", 18, 400, 250)
@@ -52,6 +52,7 @@ class Level:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_p:
                         self.paused_timer += pygame.time.get_ticks() - paused_time
+                        pygame.mixer.music.unpause()
                         pause = False
                     if event.key == pygame.K_ESCAPE:
                         self.running = False
@@ -69,7 +70,7 @@ class Level:
     def add_mob1(self, spawn_rate=100):
         now = pygame.time.get_ticks()
         if now - self.mob_time > spawn_rate:
-            mob = mob_mod.Mob(400, 0, 0, 3)
+            mob = mob_mod.Mob(400, 0, 0, 3, shooting=True, type='flipper')
             self.all_sprites.add(mob)
             self.mobs.add(mob)
             self.mob_time = now
@@ -77,7 +78,7 @@ class Level:
     def add_mob2(self, spawn_rate=100):
         now = pygame.time.get_ticks()
         if now - self.mob_time > spawn_rate:
-            mob = mob_mod.Mob(constants.WIDTH, 400, -2, 4, 1)
+            mob = mob_mod.Mob(constants.WIDTH, 400, -2, 4, 1, type='left')
             self.all_sprites.add(mob)
             self.mobs.add(mob)
             self.mob_time = now
@@ -85,7 +86,7 @@ class Level:
     def add_mob3(self, spawn_rate=100):
         now = pygame.time.get_ticks()
         if now - self.mob_time > spawn_rate:
-            mob = mob_mod.Mob(0, 100, 4, 4, 1, 10**3)
+            mob = mob_mod.Mob(0, 100, 4, 4, 1, 10**3, type='right')
             self.all_sprites.add(mob)
             self.mobs.add(mob)
             self.mob_time = now
@@ -93,9 +94,9 @@ class Level:
     def add_mob4(self, spawn_rate=100):
         now = pygame.time.get_ticks()
         if now - self.mob_time > spawn_rate:
-            mob1 = mob_mod.Mob(200, -20, 0, 1, 0)
-            mob2 = mob_mod.Mob(400, -20, 0, 1, 0, 500)
-            mob3 = mob_mod.Mob(600, -20, 0, 1, 0)
+            mob1 = mob_mod.Mob(200, -20, 0, 1, 0, shooting=True)
+            mob2 = mob_mod.Mob(400, -20, 0, 1, 0, 500, shooting=True)
+            mob3 = mob_mod.Mob(600, -20, 0, 1, 0, shooting=True)
             self.all_sprites.add(mob1)
             self.mobs.add(mob1)
             self.all_sprites.add(mob2)
@@ -118,7 +119,12 @@ class Level:
         mob_hits = pygame.sprite.groupcollide(self.mobs, self.bullets, True, True)
         for hit in mob_hits:
             stats.kills += 1
-            pass  # dźwięk i animacja wybuchu
+            sound = pygame.mixer.Sound("music/explosion.wav")
+            sound.play()
+            sound.set_volume(0.1)
+
+            expl = explosion.Explosion(hit.rect.center, 50)
+            self.all_sprites.add(expl)
 
     def lives_update(self):
         bullet_hits = pygame.sprite.spritecollide(self.player, self.mob_bullets, True)
@@ -128,6 +134,9 @@ class Level:
             self.player = player_mod.Player()
             self.all_sprites.add(self.player)
             self.player_lives -= 1
+            sound = pygame.mixer.Sound("music/explosion.wav")
+            sound.play()
+            sound.set_volume(0.1)
             print(self.player_lives)
 
         collision = pygame.sprite.spritecollide(self.player, self.mobs, True)
@@ -137,6 +146,11 @@ class Level:
             self.player = player_mod.Player()
             self.all_sprites.add(self.player)
             self.player_lives -= 1
+            expl = explosion.Explosion(hit.rect.center, 100)
+            self.all_sprites.add(expl)
+            sound = pygame.mixer.Sound("music/explosion.wav")
+            sound.play()
+            sound.set_volume(0.1)
             print(self.player_lives)
 
         if self.player_lives == 0:

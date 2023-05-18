@@ -179,7 +179,7 @@ def draw_rules(screen):
     x_button.draw()
 
     command = None
-    if x_button.check_click():
+    if x_button.check_click() or pygame.key.get_pressed()[pygame.K_ESCAPE]:
         command = 0
     return command
 
@@ -240,7 +240,7 @@ def draw_settings(screen):
     x_button.draw()
 
     command = None
-    if x_button.check_click():
+    if x_button.check_click() or pygame.key.get_pressed()[pygame.K_ESCAPE]:
         command = 0
     return command
 
@@ -272,7 +272,7 @@ def draw_best_scores(screen):
     x_button.draw()
 
     command = None
-    if x_button.check_click():
+    if x_button.check_click() or pygame.key.get_pressed()[pygame.K_ESCAPE]:
         command = 0
     return command
 
@@ -294,7 +294,7 @@ def draw_about(screen):
     x_button.draw()
 
     command = None
-    if x_button.check_click():
+    if x_button.check_click() or pygame.key.get_pressed()[pygame.K_ESCAPE]:
         command = 0
     return command
 

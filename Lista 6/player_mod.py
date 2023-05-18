@@ -5,7 +5,6 @@ from pygame.locals import *
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super(Player, self).__init__()
-        # self.image = pygame.image.load("graphics/plane1.png").convert_alpha()
         self.image = animations.player_animations[0]
         self.rect = self.image.get_rect()
         self.rect.centerx = constants.WIDTH / 2 + 7
@@ -51,7 +50,7 @@ class Player(pygame.sprite.Sprite):
 
         if now - self.last_shot > self.shoot_delay:
             self.last_shot = now
-            bullet = bullets.Bullet(self.rect.centerx, self.rect.top, 0, -5, 0)
+            bullet = bullets.Bullet(self.rect.centerx, self.rect.top, 0, -5, 0, 'player')
             self.bullets.add(bullet)
 
     def move(self):
