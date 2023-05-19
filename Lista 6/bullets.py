@@ -76,8 +76,6 @@ class Bullet(pygame.sprite.Sprite):
         elif self.kind == 'boat':
             if (self.frame % 2) == 0:
                 self.image = animations.boatmissile_animations[0]
-                # self.image = pygame.transform.rotate(self.image, self.rotate)
             if (self.frame % 2) == 1:
                 self.image = animations.boatmissile_animations[1]
-                # self.image = pygame.transform.rotate(self.image, self.rotate)
 

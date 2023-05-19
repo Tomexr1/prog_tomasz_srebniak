@@ -37,6 +37,21 @@ def set_music_settings(music_in_game, music_in_menu):
         json.dump(data, f)
 
 
+def set_scores(name, score):
+    with open('data.json', 'r') as f:
+        data = json.load(f)
+    with open('data.json', 'w') as f:
+        scores = data["scores"]
+        for i in range(3):
+            if score > scores[i]["score"]:
+                scores.insert(i, {"name": str(name), "score": score})
+                break
+        if len(scores) > 3:
+            scores.pop()
+        data["scores"] = scores
+        json.dump(data, f)
+
+
 class Button:
     def __init__(self, button_text, x, y, width, screen):
         self.text = button_text
@@ -111,15 +126,57 @@ class Button2:
         return action
 
 
+class InputBox:
+
+    def __init__(self, x, y, w, h, text=''):
+        self.rect = pygame.Rect(x, y, w, h)
+        self.color = constants.INACTIVE
+        self.text = text
+        self.txt_surface = pygame.font.Font(None, 32).render(text, True, self.color)
+        self.active = False
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            # If the user clicked on the input_box rect.
+            if self.rect.collidepoint(event.pos):
+                # Toggle the active variable.
+                self.active = not self.active
+            else:
+                self.active = False
+            # Change the current color of the input box.
+            self.color = constants.ACTIVE if self.active else constants.INACTIVE
+        if event.type == pygame.KEYDOWN:
+            if self.active:
+                if event.key == pygame.K_BACKSPACE:
+                    self.text = self.text[:-1]
+                elif event.key == pygame.K_RETURN:
+                    pass
+                else:
+                    self.text += event.unicode
+                # Re-render the text.
+                self.txt_surface = pygame.font.Font(None, 32).render(self.text, True, self.color)
+
+    def update(self):
+        # Resize the box if the text is too long.
+        width = max(200, self.txt_surface.get_width()+10)
+        self.rect.w = width
+
+    def draw(self, screen):
+        # Blit the text.
+        screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
+        # Blit the rect.
+        pygame.draw.rect(screen, self.color, self.rect, 2)
+
+
 """Sekcja menu głównego---------------------------------------------------------------------------------------------"""
 
 
 def draw_main_menu_buttons(screen):
-    background = pygame.image.load('space.png')
+    background = pygame.image.load('graphics/space.png')
     background = pygame.transform.scale(background, (constants.WIDTH, constants.HEIGHT))
     screen.blit(background, (0, 0))
 
-    s_shot = pygame.image.load('sshot.png')
+    s_shot = pygame.image.load('graphics/sshot.png')
     s_shot = pygame.transform.scale(s_shot, (constants.WIDTH/2, constants.HEIGHT/2))
     screen.blit(s_shot, (constants.WIDTH/2 - 70, constants.HEIGHT/2 - 80))
 
@@ -156,11 +213,11 @@ def draw_main_menu_buttons(screen):
 
 
 def draw_rules(screen):
-    main_background = pygame.image.load('space.png')
+    main_background = pygame.image.load('graphics/space.png')
     main_background = pygame.transform.scale(main_background, (constants.WIDTH, constants.HEIGHT))
     screen.blit(main_background, (0, 0))
 
-    background = pygame.image.load('tan_pressed.png').convert_alpha()
+    background = pygame.image.load('graphics/tan_pressed.png').convert_alpha()
     background = pygame.transform.scale(background, (constants.WIDTH/4*3, constants.HEIGHT/4*3))
     screen.blit(background, (100, 80))
 
@@ -175,7 +232,7 @@ def draw_rules(screen):
     draw_text(screen, "[Spacja] - strzelanie", 20, constants.WIDTH / 2, constants.HEIGHT / 5 + 310)
     draw_text(screen, "[P] - pauza", 20, constants.WIDTH / 2, constants.HEIGHT / 5 + 340)
 
-    x_button_img = pygame.image.load('x_button.png').convert_alpha()
+    x_button_img = pygame.image.load('graphics/x_button.png').convert_alpha()
     x_button = ImgButton(560, 120, x_button_img, 5, screen)
     x_button.draw()
 
@@ -186,11 +243,11 @@ def draw_rules(screen):
 
 
 def draw_settings(screen):
-    main_background = pygame.image.load('space.png')
+    main_background = pygame.image.load('graphics/space.png')
     main_background = pygame.transform.scale(main_background, (constants.WIDTH, constants.HEIGHT))
     screen.blit(main_background, (0, 0))
 
-    background = pygame.image.load('tan_pressed.png').convert_alpha()
+    background = pygame.image.load('graphics/tan_pressed.png').convert_alpha()
     background = pygame.transform.scale(background, (constants.WIDTH / 4 * 3, constants.HEIGHT / 4 * 3))
     screen.blit(background, (100, 80))
 
@@ -198,7 +255,7 @@ def draw_settings(screen):
 
     draw_text(screen, "Muzyka w grze: ", 20, constants.WIDTH / 2, constants.HEIGHT / 5 + 100)
     if get_music_settings()[0] == "off":
-        in_game_off_img = pygame.image.load('off.png').convert_alpha()
+        in_game_off_img = pygame.image.load('graphics/off.png').convert_alpha()
         in_game_off = ImgButton(constants.WIDTH / 2 + 70, constants.HEIGHT / 5 + 100, in_game_off_img, 1.5, screen)
         in_game_off.draw()
         if in_game_off.check_click():
@@ -207,7 +264,7 @@ def draw_settings(screen):
         # if in_game_off.draw(screen):
         #     set_music_settings("on", get_music_settings()[1])
     else:
-        in_game_on_img = pygame.image.load('on.png').convert_alpha()
+        in_game_on_img = pygame.image.load('graphics/on.png').convert_alpha()
         in_game_on = ImgButton(constants.WIDTH/2 + 70, constants.HEIGHT/5 + 100, in_game_on_img, 1.5, screen)
         in_game_on.draw()
         if in_game_on.check_click():
@@ -216,7 +273,7 @@ def draw_settings(screen):
         # if in_game_on.draw(screen):
         #     set_music_settings("off", get_music_settings()[1])
     if get_music_settings()[1] == "off":
-        in_menu_off_img = pygame.image.load('off.png').convert_alpha()
+        in_menu_off_img = pygame.image.load('graphics/off.png').convert_alpha()
         in_menu_off = ImgButton(constants.WIDTH / 2 + 75, constants.HEIGHT / 5 + 150, in_menu_off_img, 1.5, screen)
         in_menu_off.draw()
         if in_menu_off.check_click():
@@ -225,7 +282,7 @@ def draw_settings(screen):
         # if in_menu_off.draw(screen):
         #     set_music_settings(get_music_settings()[0], "on")
     else:
-        in_menu_on_img = pygame.image.load('on.png').convert_alpha()
+        in_menu_on_img = pygame.image.load('graphics/on.png').convert_alpha()
         in_menu_on = ImgButton(constants.WIDTH / 2 + 75, constants.HEIGHT / 5 + 150, in_menu_on_img, 1.5, screen)
         in_menu_on.draw()
         if in_menu_on.check_click():
@@ -236,7 +293,7 @@ def draw_settings(screen):
 
     draw_text(screen, "Muzyka w menu: ", 20, constants.WIDTH / 2, constants.HEIGHT / 5 + 150)
 
-    x_button_img = pygame.image.load('x_button.png').convert_alpha()
+    x_button_img = pygame.image.load('graphics/x_button.png').convert_alpha()
     x_button = ImgButton(560, 120, x_button_img, 5, screen)
     x_button.draw()
 
@@ -247,11 +304,11 @@ def draw_settings(screen):
 
 
 def draw_best_scores(screen):
-    main_background = pygame.image.load('space.png')
+    main_background = pygame.image.load('graphics/space.png')
     main_background = pygame.transform.scale(main_background, (constants.WIDTH, constants.HEIGHT))
     screen.blit(main_background, (0, 0))
 
-    background = pygame.image.load('tan_pressed.png').convert_alpha()
+    background = pygame.image.load('graphics/tan_pressed.png').convert_alpha()
     background = pygame.transform.scale(background, (constants.WIDTH / 4 * 3, constants.HEIGHT / 4 * 3))
     screen.blit(background, (100, 80))
 
@@ -267,8 +324,7 @@ def draw_best_scores(screen):
             draw_text(screen, str(i+1) + ". " + "brak",
                       20, constants.WIDTH / 2, constants.HEIGHT / 5 + 100 + 30*i)
 
-
-    x_button_img = pygame.image.load('x_button.png').convert_alpha()
+    x_button_img = pygame.image.load('graphics/x_button.png').convert_alpha()
     x_button = ImgButton(560, 120, x_button_img, 5, screen)
     x_button.draw()
 
@@ -279,18 +335,18 @@ def draw_best_scores(screen):
 
 
 def draw_about(screen):
-    main_background = pygame.image.load('space.png')
+    main_background = pygame.image.load('graphics/space.png')
     main_background = pygame.transform.scale(main_background, (constants.WIDTH, constants.HEIGHT))
     screen.blit(main_background, (0, 0))
 
-    background = pygame.image.load('tan_pressed.png').convert_alpha()
+    background = pygame.image.load('graphics/tan_pressed.png').convert_alpha()
     background = pygame.transform.scale(background, (constants.WIDTH / 4 * 3, constants.HEIGHT / 4 * 3))
     screen.blit(background, (100, 80))
 
     draw_text(screen, "O autorze", 60, constants.WIDTH / 2, constants.HEIGHT / 5)
     draw_text(screen, "Bla bla bla", 20, constants.WIDTH / 2, constants.HEIGHT / 5 + 100)
 
-    x_button_img = pygame.image.load('x_button.png').convert_alpha()
+    x_button_img = pygame.image.load('graphics/x_button.png').convert_alpha()
     x_button = ImgButton(560, 120, x_button_img, 5, screen)
     x_button.draw()
 
@@ -298,14 +354,3 @@ def draw_about(screen):
     if x_button.check_click() or pygame.key.get_pressed()[pygame.K_ESCAPE]:
         command = 0
     return command
-
-
-def rotate(image, origin, pivot, angle):
-    image_rect = image.get_rect(topleft=(origin[0] - pivot[0], origin[1] - pivot[1]))
-    offset_center_to_pivot = pygame.math.Vector2(origin) - image_rect.center
-    rotated_offset = offset_center_to_pivot.rotate(-angle)
-    rotated_image_center = (origin[0] - rotated_offset.x, origin[1] - rotated_offset.y)
-    rotated_image = pygame.transform.rotate(image, angle)
-    rotated_image_rect = rotated_image.get_rect(center=rotated_image_center)
-    return rotated_image_rect
-

@@ -13,7 +13,7 @@ class Level:
         self.mobs = pygame.sprite.Group()
         self.mob_bullets = pygame.sprite.Group()
         self.bullets = pygame.sprite.Group()
-        self.background = pygame.image.load("out.png").convert()
+        self.background = pygame.image.load("graphics/out.png").convert()
         self.background = pygame.transform.scale(self.background,
                     (constants.WIDTH, constants.WIDTH*self.background.get_height()/self.background.get_width()))
         self.starting_position = -1 * self.background.get_height()
@@ -26,6 +26,10 @@ class Level:
         self.boat_hp = 3
         self.boat_turrets = pygame.sprite.Group()
         self.boats = pygame.sprite.Group()
+        self.boss_spawned = False
+        self.boss = pygame.sprite.Group()
+        self.boss_hp = 1
+        self.boss_down_timer = 0
 
     def update(self):
         self.bullets.add(self.player.bullets)
@@ -34,6 +38,8 @@ class Level:
         self.all_sprites.add(mob_mod.bullets_group)
         self.mob_bullets.add(aiming_mob_mod.boat_missiles_group)
         self.all_sprites.add(aiming_mob_mod.boat_missiles_group)
+        self.bullets.add(boss_mod.bullets_group)
+        self.all_sprites.add(boss_mod.bullets_group)
 
         self.all_sprites.update()
 
@@ -44,12 +50,15 @@ class Level:
         if pygame.key.get_pressed()[pygame.K_p]:
             self.paused()
 
+        if (pygame.time.get_ticks() - self.boss_down_timer > 2000) and (self.boss_down_timer != 0):
+            self.end_of_game()
+
     def paused(self):
         pygame.mixer.music.pause()
         paused_time = pygame.time.get_ticks()
         utils.draw_text(self.screen, "Zatrzymano", 30, 400, 120)
         utils.draw_text(self.screen, "Naciśnij [p] aby wznowić", 18, 400, 250)
-        utils.draw_text(self.screen, "Naciśnij [ESC] aby wyjść z gry", 18, 400, 300)
+        utils.draw_text(self.screen, "Naciśnij [ESC] aby wyjść do menu", 18, 400, 300)
         pause = True
         while pause:
             for event in pygame.event.get():
@@ -67,6 +76,8 @@ class Level:
                         mob_mod.bullets_group.empty()
                         aiming_mob_mod.boat_missiles_group.empty()
                         boss_mod.bullets_group.empty()
+                        stats.kills = 0
+                        stats.time = 0
 
             pygame.display.update()
             self.clock.tick(15)
@@ -75,7 +86,10 @@ class Level:
         self.all_sprites.draw(self.screen)
         # self.mob_draw()
         self.boat_spawn()
+        self.boss_spawn()
+
         self.draw_hud()
+        self.draw_boss_hp()
 
     def add_mob1(self, spawn_rate=100):
         now = pygame.time.get_ticks()
@@ -159,15 +173,64 @@ class Level:
                         expl = explosion.Explosion(hit.rect.center, 50)
                         self.all_sprites.add(expl)
                         stats.kills += 10
+
+                collisions = pygame.sprite.spritecollide(self.player, self.boats, False)
+                for col in collisions:
+                    self.boat_hp -= 1
+                    self.player.update()
+                    self.player.kill()
+                    self.player = player_mod.Player()
+                    self.all_sprites.add(self.player)
+                    self.player_lives -= 1
+                    expl = explosion.Explosion(col.rect.center, 100)
+                    self.all_sprites.add(expl)
+                    sound = pygame.mixer.Sound("music/explosion.wav")
+                    sound.play()
+                    sound.set_volume(0.1)
+                    if (self.boat_hp <= 0) and (len(self.boat_turrets) > 0):
+                        self.boat_turrets.sprites()[0].kill()
+                        self.boats.sprites()[0].kill()
+                        sound = pygame.mixer.Sound("music/explosion.wav")
+                        sound.play()
+                        sound.set_volume(0.1)
+                        expl = explosion.Explosion(col.rect.center, 50)
+                        self.all_sprites.add(expl)
+                        stats.kills += 10
         # if self.starting_position < -6000:  # drugi boat
             # self.boats_spawned = 0
             # self.boat_hp = 100
 
     def boss_spawn(self):
-        pass
+        if self.starting_position > -6000:
+            if not self.boss_spawned:
+                boss = boss_mod.Boss(400, 200)
+                self.all_sprites.add(boss)
+                self.boss.add(boss)
+                self.boss_spawned = True
+            elif self.boss_spawned:
+                hits = pygame.sprite.groupcollide(self.boss, self.bullets, False, True)
+                for hit in hits:
+                    self.boss_hp -= 1
+                    if self.boss_hp <= 0:
+                        self.boss.sprites()[0].kill()
+                        sound = pygame.mixer.Sound("music/explosion.wav")
+                        sound.play()
+                        sound.set_volume(0.1)
+                        expl = explosion.Explosion(hit.rect.center, 200)
+                        self.all_sprites.add(expl)
+                        stats.kills += 100
+                        self.boss_down_timer = pygame.time.get_ticks()
 
     def draw_boss_hp(self):
-        pass
+        if self.boss_spawned:
+            hp1 = pygame.image.load('graphics/hp1.png').convert_alpha()
+            # hp1 = pygame.transform.scale(hp1, (20, 40))
+            hp0 = pygame.image.load('graphics/hp0.png').convert_alpha()
+            # hp0 = pygame.transform.scale(hp0, (20, 40))
+            for i in range(self.boss_hp):
+                self.screen.blit(hp1, (150 + i * 25, 10))
+            for i in range(20 - self.boss_hp):
+                self.screen.blit(hp0, (150 + (self.boss_hp + i) * 25, 10))
 
     def player_pos(self):
         aiming_mob_mod.player_position = [self.player.rect.centerx, self.player.rect.centery]
@@ -180,13 +243,14 @@ class Level:
             self.player = player_mod.Player()
             self.all_sprites.add(self.player)
             self.player_lives -= 1
+            expl = explosion.Explosion(hit.rect.center, 100)
+            self.all_sprites.add(expl)
             sound = pygame.mixer.Sound("music/explosion.wav")
             sound.play()
             sound.set_volume(0.1)
-            print(self.player_lives)
 
-        collision = pygame.sprite.spritecollide(self.player, self.mobs, True)
-        for hit in collision:
+        collision_mobs = pygame.sprite.spritecollide(self.player, self.mobs, True)  # z mobami
+        for hit in collision_mobs:
             self.player.update()
             self.player.kill()
             self.player = player_mod.Player()
@@ -197,24 +261,47 @@ class Level:
             sound = pygame.mixer.Sound("music/explosion.wav")
             sound.play()
             sound.set_volume(0.1)
-            print(self.player_lives)
+
+        collision_boss = pygame.sprite.spritecollide(self.player, self.boats, False)  # z bossem
+        for hit in collision_boss:
+            self.player.update()
+            self.player.kill()
+            self.player = player_mod.Player()
+            self.all_sprites.add(self.player)
+            self.player_lives -= 1
+            expl = explosion.Explosion(hit.rect.center, 100)
+            self.all_sprites.add(expl)
+            sound = pygame.mixer.Sound("music/explosion.wav")
+            sound.play()
+            sound.set_volume(0.1)
 
         if self.player_lives <= 0:
-            self.running = False
-            mob_mod.bullets_group.empty()
-            aiming_mob_mod.boat_missiles_group.empty()
-            boss_mod.bullets_group.empty()
+            self.lost()
 
     def end_of_game(self):
+        mob_mod.bullets_group.empty()
+        aiming_mob_mod.boat_missiles_group.empty()
+        boss_mod.bullets_group.empty()
         menu.won()
-        Level.running = False
+        stats.kills = 0
+        stats.time = 0
+        self.running = False
+
+    def lost(self):
+        mob_mod.bullets_group.empty()
+        aiming_mob_mod.boat_missiles_group.empty()
+        boss_mod.bullets_group.empty()
+        menu.lost()
+        stats.kills = 0
+        stats.time = 0
+        self.running = False
 
     def draw_hud(self):
         utils.draw_text(self.screen, str(stats.kills), 50, constants.WIDTH/2 + 10, 10,
                         constants.SCORE_RED)
         utils.draw_text(self.screen, 'Czas: ' + str(round(stats.time / 1000)) + 's', 20, 730, 10, constants.SCORE_RED)
-        utils.draw_text(self.screen, 'ŻYCIA: ', 30, 80, 10, constants.SCORE_RED)
-        heart_img = pygame.image.load("heart.png").convert_alpha()
+        # utils.draw_text(self.screen, 'ŻYCIA: ', 30, 80, 10, constants.SCORE_RED)
+        heart_img = pygame.image.load("graphics/heart.png").convert_alpha()
         heart_img = pygame.transform.scale(heart_img, (30, 30))
         for i in range(self.player_lives):
-            self.screen.blit(heart_img, (140 + i * 40, 10))
+            self.screen.blit(heart_img, (20 + i * 40, 10))
