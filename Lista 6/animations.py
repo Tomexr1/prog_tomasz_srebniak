@@ -12,6 +12,9 @@ enemyright_animations = []
 enemyleft_animations = []
 boatmissile_animations = []
 flipper_animations = []
+boat_turret_animations = []
+boat_animations = []
+
 
 for i in range(4):
     name = 'graphics/plane' + str(i+1) + '.png'
@@ -60,3 +63,12 @@ for i in range(7):
     name = 'graphics/flipper' + str(i+1) + '.png'
     image = pygame.image.load(name).convert_alpha()
     flipper_animations.append(image)
+
+for i in range(3):
+    name = 'graphics/boat_body' + str(i+1) + '.png'
+    image = pygame.image.load(name).convert_alpha()
+    boat_animations.append(image)
+
+for i in range(180):
+    image = pygame.image.load('graphics/turret/boat_turret' + str(i) + '.png').convert_alpha()
+    boat_turret_animations.append(image)

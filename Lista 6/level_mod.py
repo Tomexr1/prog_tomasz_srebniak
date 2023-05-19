@@ -1,4 +1,4 @@
-import pygame, constants, utils, mob_mod, player_mod, menu, stats, explosion
+import pygame, constants, utils, mob_mod, player_mod, menu, stats, explosion, aiming_mob_mod, boss_mod
 from sys import exit
 
 
@@ -22,17 +22,24 @@ class Level:
         self.mob_time = pygame.time.get_ticks()
         self.player_lives = 3
         self.paused_timer = 0
+        self.boats_spawned = 0
+        self.boat_hp = 3
+        self.boat_turrets = pygame.sprite.Group()
+        self.boats = pygame.sprite.Group()
 
     def update(self):
         self.bullets.add(self.player.bullets)
         self.all_sprites.add(self.player.bullets)
         self.mob_bullets.add(mob_mod.bullets_group)
         self.all_sprites.add(mob_mod.bullets_group)
+        self.mob_bullets.add(aiming_mob_mod.boat_missiles_group)
+        self.all_sprites.add(aiming_mob_mod.boat_missiles_group)
 
         self.all_sprites.update()
 
         self.hits()
         self.lives_update()
+        self.player_pos()
 
         if pygame.key.get_pressed()[pygame.K_p]:
             self.paused()
@@ -58,19 +65,22 @@ class Level:
                         self.running = False
                         pause = False
                         mob_mod.bullets_group.empty()
+                        aiming_mob_mod.boat_missiles_group.empty()
+                        boss_mod.bullets_group.empty()
 
             pygame.display.update()
             self.clock.tick(15)
 
     def draw(self):
         self.all_sprites.draw(self.screen)
-        self.mob_draw()
+        # self.mob_draw()
+        self.boat_spawn()
         self.draw_hud()
 
     def add_mob1(self, spawn_rate=100):
         now = pygame.time.get_ticks()
         if now - self.mob_time > spawn_rate:
-            mob = mob_mod.Mob(400, 0, 0, 3, shooting=True, type='flipper')
+            mob = mob_mod.Mob(400, 0, 0, 3, shoot_delay=1500, shooting='tap', type='flipper')
             self.all_sprites.add(mob)
             self.mobs.add(mob)
             self.mob_time = now
@@ -78,7 +88,7 @@ class Level:
     def add_mob2(self, spawn_rate=100):
         now = pygame.time.get_ticks()
         if now - self.mob_time > spawn_rate:
-            mob = mob_mod.Mob(constants.WIDTH, 400, -2, 4, 1, type='left')
+            mob = mob_mod.Mob(constants.WIDTH, 400, -2, 4, move_type=1, shooting='no', type='left')
             self.all_sprites.add(mob)
             self.mobs.add(mob)
             self.mob_time = now
@@ -86,7 +96,7 @@ class Level:
     def add_mob3(self, spawn_rate=100):
         now = pygame.time.get_ticks()
         if now - self.mob_time > spawn_rate:
-            mob = mob_mod.Mob(0, 100, 4, 4, 1, 10**3, type='right')
+            mob = mob_mod.Mob(0, 100, 4, 4, move_type=1, shooting='no', type='right')
             self.all_sprites.add(mob)
             self.mobs.add(mob)
             self.mob_time = now
@@ -94,9 +104,9 @@ class Level:
     def add_mob4(self, spawn_rate=100):
         now = pygame.time.get_ticks()
         if now - self.mob_time > spawn_rate:
-            mob1 = mob_mod.Mob(200, -20, 0, 1, 0, shooting=True)
-            mob2 = mob_mod.Mob(400, -20, 0, 1, 0, 500, shooting=True)
-            mob3 = mob_mod.Mob(600, -20, 0, 1, 0, shooting=True)
+            mob1 = mob_mod.Mob(200, -20, 0, 1, target_y=100, shooting='burst')
+            mob2 = mob_mod.Mob(400, -20, 0, 1, target_y=100, shooting='cone')
+            mob3 = mob_mod.Mob(600, -20, 0, 1, target_y=100, shooting='burst')
             self.all_sprites.add(mob1)
             self.mobs.add(mob1)
             self.all_sprites.add(mob2)
@@ -106,7 +116,7 @@ class Level:
             self.mob_time = now
 
     def mob_draw(self):
-        if -5800 < self.starting_position < -5750:
+        if -5800 < self.starting_position < -5780:
             self.add_mob1(700)
         if -5000 < self.starting_position < -4600:
             self.add_mob2(700)
@@ -125,6 +135,42 @@ class Level:
 
             expl = explosion.Explosion(hit.rect.center, 50)
             self.all_sprites.add(expl)
+
+    def boat_spawn(self):
+        if self.starting_position > -6000:  # do ustalenia
+            if self.boats_spawned == 0:
+                boat_body = aiming_mob_mod.BoatBody(200, 0, 100)
+                self.boats.add(boat_body)
+                self.all_sprites.add(boat_body)
+                boat = aiming_mob_mod.Boat(200, 20, 100+20)
+                self.boat_turrets.add(boat)
+                self.all_sprites.add(boat)
+                self.boats_spawned += 1
+            elif self.boats_spawned == 1:
+                hits = pygame.sprite.groupcollide(self.boats, self.bullets, False, True)
+                for hit in hits:
+                    self.boat_hp -= 1
+                    if (self.boat_hp <= 0) and (len(self.boat_turrets) > 0):
+                        self.boat_turrets.sprites()[0].kill()
+                        self.boats.sprites()[0].kill()
+                        sound = pygame.mixer.Sound("music/explosion.wav")
+                        sound.play()
+                        sound.set_volume(0.1)
+                        expl = explosion.Explosion(hit.rect.center, 50)
+                        self.all_sprites.add(expl)
+                        stats.kills += 10
+        # if self.starting_position < -6000:  # drugi boat
+            # self.boats_spawned = 0
+            # self.boat_hp = 100
+
+    def boss_spawn(self):
+        pass
+
+    def draw_boss_hp(self):
+        pass
+
+    def player_pos(self):
+        aiming_mob_mod.player_position = [self.player.rect.centerx, self.player.rect.centery]
 
     def lives_update(self):
         bullet_hits = pygame.sprite.spritecollide(self.player, self.mob_bullets, True)
@@ -153,9 +199,11 @@ class Level:
             sound.set_volume(0.1)
             print(self.player_lives)
 
-        if self.player_lives == 0:
+        if self.player_lives <= 0:
             self.running = False
             mob_mod.bullets_group.empty()
+            aiming_mob_mod.boat_missiles_group.empty()
+            boss_mod.bullets_group.empty()
 
     def end_of_game(self):
         menu.won()

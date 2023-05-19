@@ -6,7 +6,7 @@ bullets_group = pygame.sprite.Group()
 
 
 class Mob(pygame.sprite.Sprite):
-    def __init__(self, x, y, speed_x, speed_y, move_type=0, shoot_delay=2000, shooting=False, type='down'):
+    def __init__(self, x, y, speed_x, speed_y, target_y=1000, move_type=0, shoot_delay=2000, shooting='no', type='down'):
         super(Mob, self).__init__()
         self.type = type
         if self.type == 'down':
@@ -28,16 +28,25 @@ class Mob(pygame.sprite.Sprite):
         self.last_anim = pygame.time.get_ticks()
         self.frame = 0
         self.shooting = shooting
+        self.burst_ticks = 0
+        self.last_burst = pygame.time.get_ticks()
+        self.target_y = target_y
 
     def update(self):
-        if self.move_type == 1:
-            self.speedy = 2*math.sin(2*math.pi*self.rect.x/(constants.WIDTH))
+        if self.rect.top < self.target_y:
+            if self.move_type == 1:
+                self.speedy = 2*math.sin(2*math.pi*self.rect.x/(constants.WIDTH))
 
-        self.rect.x += self.speedx
-        self.rect.y += self.speedy
+            self.rect.x += self.speedx
+            self.rect.y += self.speedy
 
-        if self.shooting:
-            self.shoot()
+        if self.shooting != 'no':
+            if self.shooting == 'tap':
+                self.shoot()
+            elif self.shooting == 'cone':
+                self.shoot_in_cone()
+            elif self.shooting == 'burst':
+                self.burst()
 
         self.animate()
 
@@ -52,17 +61,35 @@ class Mob(pygame.sprite.Sprite):
 
     def shoot(self):
         now = pygame.time.get_ticks()
-        # if self.shoot_delay == 0:
-        #     if now - self.last_shot > 1000:
-        #         self.last_shot = now
-        #         bullet = bullets.Bullet(self.rect.centerx, self.rect.top, 0, 10, 0, 'mob')
-        #         bullets_group.add(bullet)
-        #
-
         if now - self.last_shot > self.shoot_delay:
             self.last_shot = now
             bullet = bullets.Bullet(self.rect.centerx, self.rect.top, 0, 10, 0, 'mob')
             bullets_group.add(bullet)
+
+    def shoot_in_cone(self):
+        now = pygame.time.get_ticks()
+        if now - self.last_shot > self.shoot_delay:
+            self.last_shot = now
+            bullet = bullets.Bullet(self.rect.centerx, self.rect.top, 0, 10, 0, 'mob')
+            bullets_group.add(bullet)
+            bullet = bullets.Bullet(self.rect.centerx, self.rect.top, 1, 10, 0, 'mob')
+            bullets_group.add(bullet)
+            bullet = bullets.Bullet(self.rect.centerx, self.rect.top, -1, 10, 0, 'mob')
+            bullets_group.add(bullet)
+
+    def burst(self):
+        now = pygame.time.get_ticks()
+        if (now - self.last_burst > 50) and (1 <= self.burst_ticks < 5):
+            print('burst')
+            self.last_burst = now
+            bullet = bullets.Bullet(self.rect.centerx, self.rect.top, 0, 10, 0, 'mob')
+            bullets_group.add(bullet)
+            self.burst_ticks += 1
+        elif now - self.last_shot > self.shoot_delay:
+            self.burst_ticks = 1
+            bullet = bullets.Bullet(self.rect.centerx, self.rect.top, 0, 10, 0, 'mob')
+            bullets_group.add(bullet)
+            self.last_shot = now
 
     def animate(self):
         now = pygame.time.get_ticks()
