@@ -113,9 +113,8 @@ def won():
 
 def lost():
     pygame.mixer.music.pause()
-    # sound = pygame.mixer.Sound("music/Lose sound.wav")
-    # sound.play()
-    # sound.set_volume(0.1)
+    sound = pygame.mixer.Sound("music/Lose sound.wav")
+    sound.play()
 
     paused_time = pygame.time.get_ticks()
 

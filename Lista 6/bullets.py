@@ -1,17 +1,21 @@
-import pygame, constants, animations
+import pygame, constants, animations, explosion
 from pygame.locals import *
 
 
+explosions = pygame.sprite.Group()
+
+
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x, y, speedx, speedy, rotate, kind):
+    def __init__(self, x, y, speedx, speedy, rotate, kind, target=()):
         super(Bullet, self).__init__()
         self.kind = kind
         self.rotate = rotate
+        self.target = target
         if self.kind == 'player':
             self.image = animations.playerbullet_animations[0]
         elif self.kind == 'mob':
             self.image = animations.enemybullet_animations[0]
-        elif self.kind == 'boat':
+        elif self.kind == 'rocket':
             self.image = animations.boatmissile_animations[0]
         self.rect = self.image.get_rect()
         self.rect.centerx = x
@@ -33,6 +37,9 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.y = int(self.y)
 
         self.animate()
+
+        if self.target:
+            self.explode()
 
         if self.rect.bottom < 0:
             self.kill()
@@ -73,9 +80,18 @@ class Bullet(pygame.sprite.Sprite):
                 self.image = animations.enemybullet_animations[2]
             if (self.frame % 4) == 3:
                 self.image = animations.enemybullet_animations[3]
-        elif self.kind == 'boat':
+        elif self.kind == 'rocket':
             if (self.frame % 2) == 0:
                 self.image = animations.boatmissile_animations[0]
             if (self.frame % 2) == 1:
                 self.image = animations.boatmissile_animations[1]
+
+    def explode(self):
+        if self.x > self.target[0] and self.y > self.target[1]:
+            expl = explosion.Explosion((self.x, self.y), 100)
+            explosions.add(expl)
+            sound = pygame.mixer.Sound("music/explosion.wav")
+            sound.play()
+            sound.set_volume(0.1)
+            self.kill()
 
