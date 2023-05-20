@@ -34,6 +34,7 @@ class Level:
         self.rocket_explosions = pygame.sprite.Group()
         self.kamikaze_spawned = 0
         self.kamikaze = pygame.sprite.Group()
+        self.number_of_spawns = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0}
 
     def update(self):
         self.bullets.add(self.player.bullets)
@@ -99,31 +100,34 @@ class Level:
 
     def add_mob1(self, spawn_rate=100):
         now = pygame.time.get_ticks()
-        if now - self.mob_time > spawn_rate:
+        if (now - self.mob_time > spawn_rate) and (self.number_of_spawns[0] == 0):
             mob = mob_mod.Mob(400, 0, 0, 3, target_y=120, shoot_delay=1500, shooting='tap')
             self.all_sprites.add(mob)
             self.mobs.add(mob)
             self.mob_time = now
+            self.number_of_spawns[0] += 1
 
     def add_mob2(self, spawn_rate=100):
         now = pygame.time.get_ticks()
-        if now - self.mob_time > spawn_rate:
+        if (now - self.mob_time > spawn_rate) and (self.number_of_spawns[1] < 7):
             mob = mob_mod.Mob(constants.WIDTH, 400, -2, 4, move_type=1, shooting='no', type='left')
             self.all_sprites.add(mob)
             self.mobs.add(mob)
             self.mob_time = now
+            self.number_of_spawns[1] += 1
 
     def add_mob3(self, spawn_rate=100):
         now = pygame.time.get_ticks()
-        if now - self.mob_time > spawn_rate:
+        if (now - self.mob_time > spawn_rate) and (self.number_of_spawns[2] < 7):
             mob = mob_mod.Mob(0, 100, 4, 4, move_type=1, shooting='no', type='right')
             self.all_sprites.add(mob)
             self.mobs.add(mob)
             self.mob_time = now
+            self.number_of_spawns[2] += 1
 
     def add_mob4(self, spawn_rate=100):
         now = pygame.time.get_ticks()
-        if now - self.mob_time > spawn_rate:
+        if (now - self.mob_time > spawn_rate) and (self.number_of_spawns[3] == 0):
             mob1 = mob_mod.Mob(200, -20, 0, 1, target_y=100, shoot_delay=2100, shooting='burst')
             mob2 = mob_mod.Mob(400, -20, 0, 1, target_y=100, shooting='cone')
             mob3 = mob_mod.Mob(600, -20, 0, 1, target_y=100, shoot_delay=1900, shooting='burst')
@@ -134,68 +138,155 @@ class Level:
             self.all_sprites.add(mob3)
             self.mobs.add(mob3)
             self.mob_time = now
+            self.number_of_spawns[3] += 1
 
     def add_mob5(self, spawn_rate=100):
         now = pygame.time.get_ticks()
-        if now - self.mob_time > spawn_rate:
-            mob = mob_mod.Mob(0, 100, 4, 4, move_type=1, shooting='no', type='right')
+        if (now - self.mob_time > spawn_rate) and (self.number_of_spawns[4] == 0):
+            mob1 = mob_mod.Mob(700, -20, -1, 2, target_y=100, shooting='shoot_circle')
+            self.all_sprites.add(mob1)
+            self.mobs.add(mob1)
+            mob2 = mob_mod.Mob(10, -20, 1, 2, target_y=100, shooting='shoot_circle')
+            self.all_sprites.add(mob2)
+            self.mobs.add(mob2)
+            self.mob_time = now
+            self.number_of_spawns[4] += 1
+
+    def add_mob6(self, spawn_rate=100):
+        now = pygame.time.get_ticks()
+        if (now - self.mob_time > spawn_rate) and (self.number_of_spawns[5] < 7):
+            mob1 = mob_mod.Mob(0, 70, 4, 4, move_type=1, shooting='no', type='right')
+            self.all_sprites.add(mob1)
+            self.mobs.add(mob1)
+            mob2 = mob_mod.Mob(constants.WIDTH, 450, -3, 4, move_type=1, shooting='no', type='left')
+            self.all_sprites.add(mob2)
+            self.mobs.add(mob2)
+            self.mob_time = now
+            self.number_of_spawns[5] += 1
+
+    def add_mob7(self, spawn_rate=100):
+        now = pygame.time.get_ticks()
+        if (now - self.mob_time > spawn_rate) and (self.number_of_spawns[6] == 0):
+            mob1 = mob_mod.Mob(700, -20, -1, 2, target_y=100, shooting='shoot_circle')
+            self.all_sprites.add(mob1)
+            self.mobs.add(mob1)
+            mob2 = mob_mod.Mob(10, -20, 1, 2, target_y=100, shooting='shoot_circle')
+            self.all_sprites.add(mob2)
+            self.mobs.add(mob2)
+            mob3 = mob_mod.Mob(350, -20, 0, 1, target_y=100, shoot_delay=1300, shooting='burst')
+            self.all_sprites.add(mob3)
+            self.mobs.add(mob3)
+            self.mob_time = now
+            self.number_of_spawns[6] += 1
+
+    def add_mob8(self, spawn_rate=100):
+        now = pygame.time.get_ticks()
+        if (now - self.mob_time > spawn_rate) and (self.number_of_spawns[7] < 7):
+            mob1 = mob_mod.Mob(-100, 70, 4, 4, move_type=1, shooting='no', type='right')
+            self.all_sprites.add(mob1)
+            self.mobs.add(mob1)
+            mob2 = mob_mod.Mob(constants.WIDTH, 450, -3, 4, move_type=1, shooting='no', type='left')
+            self.all_sprites.add(mob2)
+            self.mobs.add(mob2)
+            self.mob_time = now
+            self.number_of_spawns[7] += 1
+
+    def add_mob9(self, spawn_rate=100):
+        now = pygame.time.get_ticks()
+        if (now - self.mob_time > spawn_rate) and (self.number_of_spawns[8] < 7):
+            mob = mob_mod.Mob(constants.WIDTH, 400, -2, 4, move_type=1, shooting='no', type='left')
             self.all_sprites.add(mob)
             self.mobs.add(mob)
             self.mob_time = now
+            self.number_of_spawns[1] += 1
+
+    def add_mob10(self, spawn_rate=100):
+        now = pygame.time.get_ticks()
+        if (now - self.mob_time > spawn_rate) and (self.number_of_spawns[9] == 0):
+            mob1 = mob_mod.Mob(700, -20, -1, 2, target_y=200, shooting='shoot_circle')
+            self.all_sprites.add(mob1)
+            self.mobs.add(mob1)
+            mob2 = mob_mod.Mob(200, -20, 1, 2, target_y=100, shoot_delay=1000, shooting='burst')
+            self.all_sprites.add(mob2)
+            self.mobs.add(mob2)
+            self.number_of_spawns[9] += 1
 
     def mob_draw(self):
-        if -9300 < self.starting_position < -9280:
-            self.add_mob1(700)
+        if -9250 < self.starting_position:
+            self.add_mob1()
         if -8500 < self.starting_position < -8100:
             self.add_mob2(700)
         if -7300 < self.starting_position < -6900:
             self.add_mob3(1400)
         if -6500 < self.starting_position < -6400:
             self.add_mob4(1400)
-        if -4500 < self.starting_position < -4000:
-            self.add_mob5(700)
+        if -4500 < self.starting_position < -4480:
+            self.add_mob5()
+        if -3800 < self.starting_position < -3400:  # umierają w -3108
+            self.add_mob6(700)
+        if -3120 < self.starting_position < -3000:
+            self.add_mob7()
+        if -2700 < self.starting_position < -2400:
+            self.add_mob8(700)
+        if -1700 < self.starting_position < -1400:
+            self.add_mob9(700)
+        if -1500 < self.starting_position:
+            self.add_mob10()
 
     def add_kamikaze(self):
         if self.starting_position > -7500:
             if self.kamikaze_spawned == 0:
-                mob = mob_mod.Mob(0, 300, 4, -1, type='kamikaze')
+                mob = mob_mod.Mob(0, 300, 4, -1, type='kamikazeright')
                 self.all_sprites.add(mob)
                 self.kamikaze.add(mob)
                 self.kamikaze_spawned = 1
         if self.starting_position > -4700:
             if self.kamikaze_spawned == 1:
-                mob = mob_mod.Mob(800, 50, -4, 1, type='kamikaze')
+                mob = mob_mod.Mob(800, 50, -4, 1, type='kamikazeleft')
                 self.all_sprites.add(mob)
                 self.kamikaze.add(mob)
                 self.kamikaze_spawned = 2
+        if self.starting_position > -3100:
+            if self.kamikaze_spawned == 2:
+                mob = mob_mod.Mob(0, 300, 4, -2, type='kamikazeright')
+                self.all_sprites.add(mob)
+                self.kamikaze.add(mob)
+                self.kamikaze_spawned = 3
+        if self.starting_position > -1500:
+            if self.kamikaze_spawned == 3:
+                mob = mob_mod.Mob(800, 50, -4, 2, type='kamikazeleft')
+                self.all_sprites.add(mob)
+                self.kamikaze.add(mob)
+                self.kamikaze_spawned = 4
 
     def hits(self):
         mob_hits = pygame.sprite.groupcollide(self.mobs, self.bullets, True, True)
         for hit in mob_hits:
-            stats.kills += 1
+            stats.kills += 20
             sound = pygame.mixer.Sound("music/explosion.wav")
             sound.play()
             sound.set_volume(0.1)
 
             expl = explosion.Explosion(hit.rect.center, 50)
             self.all_sprites.add(expl)
-        kamkikaze_hits = pygame.sprite.groupcollide(self.kamikaze, self.bullets, True, True)
-        for hit in kamkikaze_hits:
-            stats.kills += 10
+
+        kamikaze_hits = pygame.sprite.groupcollide(self.kamikaze, self.bullets, True, True)
+        for hit in kamikaze_hits:
+            stats.kills += 100
             sound = pygame.mixer.Sound("music/explosion.wav")
             sound.play()
             sound.set_volume(0.1)
 
-            expl = explosion.Explosion(hit.rect.center, 35)
+            expl = explosion.Explosion(hit.rect.center, 45)
             self.all_sprites.add(expl)
 
     def boat_spawn(self):
-        if self.starting_position > -5600:  # do ustalenia
+        if self.starting_position > -5600:  # -5600
             if self.boats_spawned == 0:
-                boat_body = aiming_mob_mod.BoatBody(650, -20, 100)
+                boat_body = aiming_mob_mod.BoatBody(650, -50, 100)
                 self.boats.add(boat_body)
                 self.all_sprites.add(boat_body)
-                boat = aiming_mob_mod.Boat(650, 0, 100+20)
+                boat = aiming_mob_mod.Boat(650, -30, 100+20)
                 self.boat_turrets.add(boat)
                 self.all_sprites.add(boat)
                 self.boats_spawned += 1
@@ -214,15 +305,39 @@ class Level:
                         sound.set_volume(0.1)
                         expl = explosion.Explosion(hit.rect.center, 50)
                         self.all_sprites.add(expl)
-                        stats.kills += 20
+                        stats.kills += 200
+                        self.boat_hp = 3
 
-        # if self.starting_position < -6000:  # drugi boat
-            # self.boats_spawned = 0
-            # self.boat_hp = 100
+        if self.starting_position > -2000:  # drugi boat
+            if (self.boats_spawned == 1) and (len(self.boat_turrets) == 0):
+                boat_body = aiming_mob_mod.BoatBody(650, -50, 100)
+                self.boats.add(boat_body)
+                self.all_sprites.add(boat_body)
+                boat = aiming_mob_mod.Boat(650, -30, 100+20)
+                self.boat_turrets.add(boat)
+                self.all_sprites.add(boat)
+                self.boats_spawned += 1
+            elif self.boats_spawned == 2:
+                hits = pygame.sprite.groupcollide(self.boats, self.bullets, False, True)
+                for hit in hits:
+                    self.boat_hp -= 1
+                    sound = pygame.mixer.Sound("music/impact.wav")
+                    sound.play()
+                    sound.set_volume(0.5)
+                    if (self.boat_hp <= 0) and (len(self.boat_turrets) > 0):
+                        self.boat_turrets.sprites()[0].kill()
+                        self.boats.sprites()[0].kill()
+                        sound = pygame.mixer.Sound("music/explosion.wav")
+                        sound.play()
+                        sound.set_volume(0.1)
+                        expl = explosion.Explosion(hit.rect.center, 100)
+                        self.all_sprites.add(expl)
+                        stats.kills += 200
 
     def boss_spawn(self):
-        if self.starting_position > -1000:
+        if self.starting_position > -900:
             if not self.boss_spawned:
+                self.kill_mobs()
                 sound = pygame.mixer.Sound("music/warning.wav")
                 sound.play()
                 boss = boss_mod.Boss(330, -250)
@@ -243,7 +358,7 @@ class Level:
                         sound.set_volume(2)
                         expl = explosion.Explosion(hit.rect.center, 200)
                         self.all_sprites.add(expl)
-                        stats.kills += 100
+                        stats.kills += 2000
                         self.boss_down_timer = pygame.time.get_ticks()
 
     def draw_boss_hp(self):
@@ -258,6 +373,21 @@ class Level:
             for i in range(100 - self.boss_hp):
                 # self.screen.blit(hp0, (150 + (self.boss_hp + i) * 25, 10))
                 self.screen.blit(hp0, (150 + (self.boss_hp + i) * 5, 7))
+
+    def kill_mobs(self):
+        for mob in self.mobs:
+            expl = explosion.Explosion(mob.rect.center, 100)
+            self.all_sprites.add(expl)
+            mob.kill()
+        for mob in self.boat_turrets:
+            expl = explosion.Explosion(mob.rect.center, 100)
+            self.all_sprites.add(expl)
+            mob.kill()
+        for mob in self.boats:
+            mob.kill()
+        sound = pygame.mixer.Sound("music/explosion.wav")
+        sound.play()
+        sound.set_volume(0.1)
 
     def player_pos(self):
         aiming_mob_mod.player_position = [self.player.rect.centerx, self.player.rect.centery]
@@ -340,7 +470,7 @@ class Level:
                         sound.set_volume(0.1)
                         expl = explosion.Explosion(collisions[0].rect.center, 50)
                         self.all_sprites.add(expl)
-                        stats.kills += 20
+                        stats.kills += 200
 
         if self.player_lives == 1:
             self.player.smoke = True

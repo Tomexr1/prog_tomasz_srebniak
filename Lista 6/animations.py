@@ -15,7 +15,8 @@ flipper_animations = []
 boat_turret_animations = []
 boat_animations = []
 smoke_animations = []
-kamikaze_animations = []
+kamikaze_l_animations = []
+kamikaze_r_animations = []
 blank_image = pygame.Surface((1, 1), pygame.SRCALPHA)
 
 
@@ -84,4 +85,10 @@ for i in range(7):
 for i in range(2):
     image = pygame.image.load('graphics/kamikaze' + str(i+1) + '.png').convert_alpha()
     image = pygame.transform.scale(image, (40, 46))
-    kamikaze_animations.append(image)
+    kamikaze_r_animations.append(image)
+
+for i in range(2):
+    image = pygame.image.load('graphics/kamikaze' + str(i+1) + '.png').convert_alpha()
+    image = pygame.transform.scale(image, (40, 46))
+    image = pygame.transform.flip(image, True, False)
+    kamikaze_l_animations.append(image)

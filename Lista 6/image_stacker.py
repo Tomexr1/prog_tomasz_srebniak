@@ -37,5 +37,5 @@ def flip_image(f1):
 
 # img = Image.open('graphics/out2.png')
 # converter = ImageEnhance.Color(img)
-# img2 = converter.enhance(0.5)
-# img2.save('graphics/out3.png')
+# img2 = converter.enhance(0.25)
+# img2.save('graphics/out4.png')

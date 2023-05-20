@@ -17,8 +17,10 @@ class Mob(pygame.sprite.Sprite):
             self.image = animations.enemyleft_animations[0]
         elif self.type == 'flipper':
             self.image = animations.flipper_animations[0]
-        elif self.type == 'kamikaze':
-            self.image = animations.kamikaze_animations[0]
+        elif self.type == 'kamikazeleft':
+            self.image = animations.kamikaze_l_animations[0]
+        elif self.type == 'kamikazeright':
+            self.image = animations.kamikaze_r_animations[0]
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -38,8 +40,6 @@ class Mob(pygame.sprite.Sprite):
         if self.rect.top < self.target_y:
             if self.move_type == 1:
                 self.speedy = 2*math.sin(2*math.pi*self.rect.x/(constants.WIDTH))
-            elif self.move_type == 2:
-                self.speedy = 2*math.sin(2*math.pi*self.rect.x/(constants.WIDTH/2))
 
             self.rect.x += self.speedx
             self.rect.y += self.speedy
@@ -51,6 +51,8 @@ class Mob(pygame.sprite.Sprite):
                 self.shoot_in_cone()
             elif self.shooting == 'burst':
                 self.burst()
+            elif self.shooting == 'shoot_circle':
+                self.shoot_circle()
 
         self.animate()
 
@@ -94,6 +96,14 @@ class Mob(pygame.sprite.Sprite):
             bullets_group.add(bullet)
             self.last_shot = now
 
+    def shoot_circle(self):
+        now = pygame.time.get_ticks()
+        if now - self.last_shot > self.shoot_delay:
+            self.last_shot = now
+            for i in range(0, 360, 30):
+                bullet = bullets.Bullet(self.rect.centerx, self.rect.bottom, 4*math.cos(i), 4*math.sin(i), 0, 'mob')
+                bullets_group.add(bullet)
+
     def animate(self):
         now = pygame.time.get_ticks()
         if now - self.last_anim > 100:
@@ -134,8 +144,13 @@ class Mob(pygame.sprite.Sprite):
                 self.image = animations.flipper_animations[5]
             if self.frame == 6:
                 self.image = animations.flipper_animations[6]
-        elif self.type == "kamikaze":
+        elif self.type == "kamikazeleft":
             if (self.frame % 2) == 0:
-                self.image = animations.kamikaze_animations[0]
+                self.image = animations.kamikaze_l_animations[0]
             if (self.frame % 2) == 1:
-                self.image = animations.kamikaze_animations[1]
+                self.image = animations.kamikaze_l_animations[1]
+        elif self.type == 'kamikazeright':
+            if (self.frame % 2) == 0:
+                self.image = animations.kamikaze_r_animations[0]
+            if (self.frame % 2) == 1:
+                self.image = animations.kamikaze_r_animations[1]
