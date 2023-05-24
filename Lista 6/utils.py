@@ -137,13 +137,10 @@ class InputBox:
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            # If the user clicked on the input_box rect.
             if self.rect.collidepoint(event.pos):
-                # Toggle the active variable.
                 self.active = not self.active
             else:
                 self.active = False
-            # Change the current color of the input box.
             self.color = constants.ACTIVE if self.active else constants.INACTIVE
         if event.type == pygame.KEYDOWN:
             if self.active:
@@ -153,18 +150,14 @@ class InputBox:
                     pass
                 else:
                     self.text += event.unicode
-                # Re-render the text.
                 self.txt_surface = pygame.font.Font(None, 32).render(self.text, True, self.color)
 
     def update(self):
-        # Resize the box if the text is too long.
         width = max(200, self.txt_surface.get_width()+10)
         self.rect.w = width
 
     def draw(self, screen):
-        # Blit the text.
         screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
-        # Blit the rect.
         pygame.draw.rect(screen, self.color, self.rect, 2)
 
 
@@ -176,11 +169,15 @@ def draw_main_menu_buttons(screen):
     background = pygame.transform.scale(background, (constants.WIDTH, constants.HEIGHT))
     screen.blit(background, (0, 0))
 
-    s_shot = pygame.image.load('graphics/sshot.png')
+    s_shot = pygame.image.load('graphics/sshot2.png')
     s_shot = pygame.transform.scale(s_shot, (constants.WIDTH/2, constants.HEIGHT/2))
     screen.blit(s_shot, (constants.WIDTH/2 - 70, constants.HEIGHT/2 - 80))
 
-    draw_text(screen, "Menu", 70, constants.WIDTH/2, 50)
+    # draw_text(screen, "Menu", 70, constants.WIDTH/2, 50)
+    logo = pygame.image.load('graphics/logo.png').convert()
+    logo = pygame.transform.scale(logo, (300, 150))
+    logo.set_colorkey(constants.WHITE, pygame.RLEACCEL)
+    screen.blit(logo, (constants.WIDTH/2 - 150, 30))
     exit_button = Button('Wyjście', 160, 500, 75, screen)
     start_button = Button('Zagraj', 160, 200, 70, screen)
     rules_button = Button('Zasady', 158, 260, 74, screen)
@@ -222,7 +219,7 @@ def draw_rules(screen):
     screen.blit(background, (100, 80))
 
     draw_text(screen, "Zasady", 60, constants.WIDTH / 2, constants.HEIGHT / 5)
-    draw_text(screen, "Witaj w x.", 20, constants.WIDTH / 2, constants.HEIGHT / 5 + 100)
+    draw_text(screen, "Witaj w Blue Wings.", 20, constants.WIDTH / 2, constants.HEIGHT / 5 + 100)
     draw_text(screen, "Gra polega na zestrzeliwaniu przeciwników", 20, constants.WIDTH / 2, constants.HEIGHT / 5 + 130)
     draw_text(screen, "i zbieraniu w ten sposób punktów.", 20, constants.WIDTH / 2, constants.HEIGHT / 5 + 160)
     draw_text(screen, "Unikaj pocisków przeciwnika.", 20, constants.WIDTH / 2, constants.HEIGHT / 5 + 190)

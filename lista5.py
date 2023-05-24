@@ -38,7 +38,7 @@ def get_selected_data(*args):
     :return: None
     """
 
-    if len(selected_date.get()) > 4:
+    if len(selected_date.get()) > 9:
         new_date = selected_date.get()
         url = f"http://api.nbp.pl/api/exchangerates/tables/A/{new_date}/?format=json"
         try:
